@@ -1,23 +1,53 @@
-import argparse;
-import glob : glob;
+import darg;
 
-@(Command("dcu2pas").Description("Decompile dcu(Delphi Compiled Unit) to pas.")
-        .Epilog(() => "Best wishes for your happiness and success"))
-struct Config
+struct Options
 {
-    @(PositionalArgument(0).Description(() => "File to decompile"))
-    string[] file;
+    @Option("help", "h")
+    @Help("Prints this help.")
+    OptionFlag help;
+
+    @Argument("file", Multiplicity.zeroOrMore)
+    @Help("Files to decompiled")
+    string[] files;
 }
 
-mixin CLI!Config.main!((args) {
-    import std.stdio : writeln;
+// Generate the usage and help string at compile time.
+immutable usage = usageString!Options("dcu2pas");
+immutable help = helpString!Options;
 
-    foreach (file; args.file)
+int main(string[] args)
+{
+    import glob : glob;
+    import std.stdio;
+
+    Options options;
+
+    try
+    {
+        options = parseArgs!Options(args[1 .. $]);
+    }
+    catch (ArgParseError e)
+    {
+        writeln(e.msg);
+        writeln(usage);
+        return 1;
+    }
+    catch (ArgParseHelp e)
+    {
+        // Help was requested
+        writeln(usage);
+        write(help);
+        return 0;
+    }
+
+    foreach (file; options.files)
     {
         foreach (entry; glob(file))
         {
-            writeln(entry);
+            writefln("%s decompiling....", entry);
         }
     }
+    writeln("Done.");
+
     return 0;
-});
+}
