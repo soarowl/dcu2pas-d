@@ -1,4 +1,5 @@
 import argparse;
+import glob : glob;
 
 @(Command("dcu2pas").Description("Decompile dcu(Delphi Compiled Unit) to pas.")
         .Epilog(() => "Best wishes for your happiness and success"))
@@ -9,9 +10,14 @@ struct Config
 }
 
 mixin CLI!Config.main!((args) {
-    // do whatever you need
     import std.stdio : writeln;
 
-    args.writeln;
+    foreach (file; args.file)
+    {
+        foreach (entry; glob(file))
+        {
+            writeln(entry);
+        }
+    }
     return 0;
 });
