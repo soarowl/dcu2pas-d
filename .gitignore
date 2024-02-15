@@ -1,0 +1,15 @@
+.dub
+docs.json
+__dummy.html
+/dcu2pas
+dcu2pas.so
+dcu2pas.dylib
+dcu2pas.dll
+dcu2pas.a
+dcu2pas.lib
+dcu2pas-test-*
+*.exe
+*.pdb
+*.o
+*.obj
+*.lst

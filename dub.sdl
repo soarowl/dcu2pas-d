@@ -1,0 +1,5 @@
+name "dcu2pas"
+description "Decompile dcu(Delphi Compiled Unit) to pas."
+authors "Zhuo Nengwen"
+copyright "Copyright © 2024, Zhuo Nengwen"
+license "MIT"
