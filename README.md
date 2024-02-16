@@ -4,9 +4,10 @@ Decompile dcu(Delphi Compiled Unit) to pas.
 
 ## install
 
-Download latest release from [Releases](https://github.com/soarowl/dcu2pas-nim/releases)
+Download latest release from
+[Releases](https://github.com/soarowl/dcu2pas-d/releases)
 
-## builf from source
+## build from source
 
 ```sh
 git clone https://github.com/soarowl/dcu2pas-d.git
@@ -32,16 +33,6 @@ dcu2pas abc*.dcu
 # decompile all subdirectories' dcu to pas
 dcu2pas src/**/*.dcu
 ```
-
-## colorful output
-
-### linux
-
-Move `config` to `$HOME/.config/cligen`
-
-### windows
-
-Move `config` to `$APPDATA\.config\cligen`
 
 ## License
 
