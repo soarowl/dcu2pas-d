@@ -1,4 +1,4 @@
-import std.array, std.bitmanip, std.file, std.path, std.string;
+import std.array, std.bitmanip, std.file, std.path, std.stdio, std.string;
 import dcuserial;
 
 // At present serail/deserial dont work.
@@ -77,7 +77,7 @@ align(1)
 
         DcuHeader header;
         ubyte unknown1;
-        ubyte finish = 0x61;
+        // ubyte finish = 0x61;
 
         void decompile(string filename)
         {
@@ -86,6 +86,10 @@ align(1)
             this = deserialize!(Dcu)(buffer);
             setFileName(filename);
             std.file.write(filename ~ ".pas", this.toString());
+            if (buffer.rindex < buffer.windex)
+            {
+                writefln("  End at: $%X with: $%X", buffer.rindex, buffer.peek!ubyte());
+            }
         }
 
         void setFileName(string filename)
