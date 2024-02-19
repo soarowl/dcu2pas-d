@@ -1,4 +1,4 @@
-import std.array, std.bitmanip, std.file, std.string;
+import std.array, std.bitmanip, std.file, std.path, std.string;
 import dcuserial;
 
 struct FileDate
@@ -56,36 +56,51 @@ align(1)
             w ~= format("// compiler: $%02X\n", compiler);
             w ~= format("// size: %d\n", size);
             w ~= format("// compiled: %s\n", compiledAt.toString());
-            w ~= format("// crc: $%08X\n", crc);
+            w ~= format("// crc: $%08X\n\n", crc);
             return w[];
         }
     }
 
     struct Dcu
     {
+        @Exclude string filename;
+        @Exclude string unitname;
+
         DcuHeader header;
         ubyte unknown1;
         ubyte finish = 0x61;
-
-        void updateBufferProperties(Buffer buffer)
-        {
-            auto header = buffer.peek!(DcuHeader)();
-            header.updateBufferProperties(buffer);
-        }
 
         void decompile(string filename)
         {
             auto content = std.file.read(filename);
             auto buffer = new Buffer(content);
-            updateBufferProperties(buffer);
-            this = buffer.read!(Dcu)();
+            this = deserialize!(Dcu)(buffer);
+            setFileName(filename);
             std.file.write(filename ~ ".pas", this.toString());
+        }
+
+        void setFileName(string filename)
+        {
+            if (this.filename.length == 0)
+            {
+                this.filename = filename;
+            }
+            if (this.unitname.length == 0)
+            {
+                auto ext = extension(filename);
+                auto name = baseName(filename, ext);
+                this.unitname = name;
+            }
         }
 
         string toString()
         {
             auto w = appender!string;
             w ~= header.toString();
+            w ~= format("unit %s;\n\ninterface\n\n", unitname);
+            w ~= "";
+            w ~= "implematation\n\n";
+            w ~= "end.\n";
             return w[];
         }
     }
