@@ -17,7 +17,7 @@ struct FileDate
     {
         auto pfd = cast(FileDate_internal*)&this;
         return format("%04d-%02d-%02d %02d:%02d:%02d", pfd.year + 1980,
-                pfd.month, pfd.day, pfd.hour, pfd.minute, pfd.second * 2);
+                pfd.month, pfd.day, pfd.hour, pfd.minute, pfd.second << 2);
     }
 
     this(uint year, uint month, uint day, uint hour, uint minute, uint second)
