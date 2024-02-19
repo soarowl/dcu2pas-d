@@ -1,25 +1,34 @@
 import std.array, std.bitmanip, std.file, std.path, std.string;
 import dcuserial;
 
-struct FileDate
+// At present serail/deserial dont work.
+struct FileDate_internal
 {
     mixin(bitfields!(uint, "second", 5, uint, "minute", 6, uint, "hour", 5,
             uint, "day", 5, uint, "month", 4, uint, "year", 7));
+}
+
+struct FileDate
+{
+    ushort time;
+    ushort date;
 
     string toString()
     {
-        return format("%04d-%02d-%02d %02d:%02d:%02d", year + 1980, month, day,
-                hour, minute, second * 2);
+        auto pfd = cast(FileDate_internal*)&this;
+        return format("%04d-%02d-%02d %02d:%02d:%02d", pfd.year + 1980,
+                pfd.month, pfd.day, pfd.hour, pfd.minute, pfd.second * 2);
     }
 
     this(uint year, uint month, uint day, uint hour, uint minute, uint second)
     {
-        this.year = year - 1980;
-        this.month = month;
-        this.day = day;
-        this.hour = hour;
-        this.minute = minute;
-        this.second = second >> 1;
+        auto pfd = cast(FileDate_internal*)&this;
+        pfd.year = year - 1980;
+        pfd.month = month;
+        pfd.day = day;
+        pfd.hour = hour;
+        pfd.minute = minute;
+        pfd.second = second >> 1;
     }
 }
 
