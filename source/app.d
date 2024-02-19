@@ -1,4 +1,4 @@
-import darg;
+import darg, dcu;
 
 struct Options
 {
@@ -45,6 +45,8 @@ int main(string[] args)
         foreach (entry; glob(file))
         {
             writefln("%s decompiling....", entry);
+            Dcu dcu;
+            dcu.decompile(entry);
         }
     }
     writeln("Done.");
