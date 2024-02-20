@@ -1,33 +1,6 @@
 import std.array, std.bitmanip, std.datetime, std.file, std.path, std.stdio, std.string;
 import dcuserial;
 
-enum Compiler : ubyte
-{
-    Delphi6 = 14,
-    Delphi7 = 15,
-    Delphi8 = 16,
-    Delphi2005 = 17,
-    Delphi2006 = 18,
-    Delphi2007 = 19,
-    Delphi2009 = 20,
-    Delphi2010 = 21,
-    DelphiXE = 22,
-    DelphiXE2 = 23,
-    DelphiXE3 = 24,
-    DelphiXE4 = 25,
-    DelphiXE5 = 26,
-    DelphiXE6 = 27,
-    DelphiXE7 = 28,
-    DelphiXE8 = 29,
-    Delphi10 = 30,
-    Delphi10Berlin = 31,
-    Delphi10Tokyo = 32,
-    Delphi10Rio = 33,
-    Delphi10Sydney = 34,
-    Delphi11 = 35,
-    Delphi12 = 36
-}
-
 enum string[ubyte] Compilers = [
     Compiler.Delphi6: "Borland Delphi 6", Compiler.Delphi7: "Borland Delphi 7",
     Compiler.Delphi8: "Borland Delphi 8 for .NET",
@@ -63,20 +36,6 @@ string getCompilerString(ubyte compiler)
     {
         return "Unknown compiler";
     }
-}
-
-enum Platform : ubyte
-{
-    Win32_00 = 0,
-    Win32_03 = 3,
-    OSX32_04 = 4,
-    iOSSimulator32_14 = 0x14,
-    Win64_23 = 0x23,
-    Android32_67 = 0x67,
-    iOSDevice32_76 = 0x76,
-    Android32_77 = 0x77,
-    Android64_87 = 0x87,
-    iOSDevice64_94 = 0x94
 }
 
 enum string[ubyte] Platforms = [
@@ -130,6 +89,24 @@ align(1)
             return w[];
         }
     }
+
+    struct DcuAddtional
+    {
+        @Condition("__buffer.compiler >= 15 /*Compiler.Delph7*/")
+        ubyte tag = 2;
+        @Condition("__buffer.compiler >= 18 /*Compiler.Delph2006*/")
+        @Length!ubyte string name;
+        @Condition("__buffer.compiler >= 20 /*Compiler.Delph2009*/")
+        {
+            @Var int unknown1;
+            @Var uint unknown2;
+        }
+
+        string toString()
+        {
+            return format("$%02X %s %d %d", tag, name, unknown1, unknown2);
+        }
+    }
 }
 
 class Dcu
@@ -141,6 +118,7 @@ class Dcu
     Buffer decodeBuffer;
     DcuHeader header;
     ubyte unknown1;
+    DcuAddtional addtional;
     // ubyte finish = 0x61;
 
     void encode()
@@ -151,6 +129,8 @@ class Dcu
         header.updateBufferProperties(contentBuffer);
 
         contentBuffer.write(unknown1);
+        // contentBuffer.write!DcuAddtional(addtional);
+        addtional.serialize(contentBuffer);
         // contentBuffer.write(finish);
 
         auto encodeHeader = header;
@@ -165,6 +145,8 @@ class Dcu
     {
         header = decodeBuffer.read!DcuHeader();
         unknown1 = decodeBuffer.read!ubyte();
+        // addtional = decodeBuffer.read!DcuAddtional();
+        addtional = deserialize!DcuAddtional(decodeBuffer);
         // finish = decodeBuffer.read!ubyte();
     }
 
@@ -199,6 +181,7 @@ class Dcu
     {
         auto w = appender!string;
         w ~= header.toString();
+        w ~= format("// Additional: %s\n", addtional);
         w ~= format("unit %s;\n\ninterface\n\n", unitname);
         w ~= "";
         w ~= "implematation\n\n";
