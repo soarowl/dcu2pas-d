@@ -92,11 +92,11 @@ align(1)
 
     struct DcuAddtional
     {
-        @Condition("__buffer.compiler >= 15 /*Compiler.Delph7*/")
+        @Condition("__buffer.compiler >= Compiler.Delphi7")
         ubyte tag = 2;
-        @Condition("__buffer.compiler >= 18 /*Compiler.Delph2006*/")
+        @Condition("__buffer.compiler >= Compiler.Delphi2006")
         @Length!ubyte string name;
-        @Condition("__buffer.compiler >= 20 /*Compiler.Delph2009*/")
+        @Condition("__buffer.compiler >= Compiler.Delphi2009")
         {
             @Var int unknown1;
             @Var uint unknown2;
