@@ -45,7 +45,7 @@ int main(string[] args)
         foreach (entry; glob(file))
         {
             writefln("%s decompiling....", entry);
-            Dcu dcu;
+            Dcu dcu = new Dcu();
             dcu.decompile(entry);
         }
     }
