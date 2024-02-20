@@ -85,7 +85,7 @@ align(1)
             w ~= format("// compiler: %s\n", getCompilerString(compiler));
             w ~= format("// size: %d\n", size);
             w ~= format("// compiled: %s\n", DosFileTimeToSysTime(compiledAt).toISOExtString());
-            w ~= format("// crc: $%08X\n", crc);
+            w ~= format("// crc: $%08X\n\n", crc);
             return w[];
         }
     }
@@ -104,7 +104,21 @@ align(1)
 
         string toString()
         {
-            return format("$%02X %s %d %d", tag, name, unknown1, unknown2);
+            return format("// Addtional: $%02X %s %d %d\n", tag, name, unknown1, unknown2);
+        }
+    }
+
+    struct DcuFlag
+    {
+        ubyte tag = 0x96;
+        @Var uint unknown1;
+        @Condition("__buffer.compiler >= Compiler.Delphi2006")
+        @Var uint unknown2;
+        @Var uint unknown3;
+
+        string toString()
+        {
+            return format("// Compile flags: $%02X %s %d %d\n", tag, unknown1, unknown2, unknown3);
         }
     }
 }
@@ -119,6 +133,7 @@ class Dcu
     DcuHeader header;
     ubyte unknown1;
     DcuAddtional addtional;
+    DcuFlag dcuFlag;
     // ubyte finish = 0x61;
 
     void encode()
@@ -129,8 +144,8 @@ class Dcu
         header.updateBufferProperties(contentBuffer);
 
         contentBuffer.write(unknown1);
-        // contentBuffer.write!DcuAddtional(addtional);
         addtional.serialize(contentBuffer);
+        dcuFlag.serialize(contentBuffer);
         // contentBuffer.write(finish);
 
         auto encodeHeader = header;
@@ -145,8 +160,8 @@ class Dcu
     {
         header = decodeBuffer.read!DcuHeader();
         unknown1 = decodeBuffer.read!ubyte();
-        // addtional = decodeBuffer.read!DcuAddtional();
         addtional = deserialize!DcuAddtional(decodeBuffer);
+        dcuFlag = deserialize!DcuFlag(decodeBuffer);
         // finish = decodeBuffer.read!ubyte();
     }
 
@@ -181,7 +196,8 @@ class Dcu
     {
         auto w = appender!string;
         w ~= header.toString();
-        w ~= format("// Additional: %s\n", addtional);
+        w ~= addtional.toString();
+        w ~= dcuFlag.toString();
         w ~= format("\nunit %s;\n\ninterface\n\n", unitname);
         w ~= "";
         w ~= "implematation\n\n";
