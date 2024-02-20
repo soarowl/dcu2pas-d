@@ -121,6 +121,20 @@ align(1)
             return format("// Compile flags: $%02X %s %d %d\n", tag, unknown1, unknown2, unknown3);
         }
     }
+
+    class SourceFile
+    {
+        ubyte tag = 0x70;
+        @Length!ubyte string name;
+        DosFileTime lastModified;
+        @Var uint index;
+
+        override string toString()
+        {
+            return format("// Source file: $%02X %s %s %d\n", tag, name,
+                    DosFileTimeToSysTime(lastModified).toISOExtString(), index);
+        }
+    }
 }
 
 class Dcu
@@ -134,6 +148,7 @@ class Dcu
     ubyte unknown1;
     DcuAddtional addtional;
     DcuFlag dcuFlag;
+    SourceFile[] sourceFiles;
     // ubyte finish = 0x61;
 
     void encode()
@@ -146,6 +161,10 @@ class Dcu
         contentBuffer.write(unknown1);
         addtional.serialize(contentBuffer);
         dcuFlag.serialize(contentBuffer);
+        foreach (source; sourceFiles)
+        {
+            source.serialize(contentBuffer);
+        }
         // contentBuffer.write(finish);
 
         auto encodeHeader = header;
@@ -162,6 +181,14 @@ class Dcu
         unknown1 = decodeBuffer.read!ubyte();
         addtional = deserialize!DcuAddtional(decodeBuffer);
         dcuFlag = deserialize!DcuFlag(decodeBuffer);
+        for (;;)
+        {
+            ubyte tag = decodeBuffer.peek!ubyte();
+            if (tag != 0x70)
+                break;
+            auto source = deserialize!SourceFile(decodeBuffer);
+            sourceFiles ~= source;
+        }
         // finish = decodeBuffer.read!ubyte();
     }
 
@@ -198,6 +225,10 @@ class Dcu
         w ~= header.toString();
         w ~= addtional.toString();
         w ~= dcuFlag.toString();
+        foreach (source; sourceFiles)
+        {
+            w ~= source.toString();
+        }
         w ~= format("\nunit %s;\n\ninterface\n\n", unitname);
         w ~= "";
         w ~= "implematation\n\n";
