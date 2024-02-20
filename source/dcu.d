@@ -85,7 +85,7 @@ align(1)
             w ~= format("// compiler: %s\n", getCompilerString(compiler));
             w ~= format("// size: %d\n", size);
             w ~= format("// compiled: %s\n", DosFileTimeToSysTime(compiledAt).toISOExtString());
-            w ~= format("// crc: $%08X\n\n", crc);
+            w ~= format("// crc: $%08X\n", crc);
             return w[];
         }
     }
@@ -182,7 +182,7 @@ class Dcu
         auto w = appender!string;
         w ~= header.toString();
         w ~= format("// Additional: %s\n", addtional);
-        w ~= format("unit %s;\n\ninterface\n\n", unitname);
+        w ~= format("\nunit %s;\n\ninterface\n\n", unitname);
         w ~= "";
         w ~= "implematation\n\n";
         w ~= "end.\n";
