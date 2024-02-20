@@ -1,4 +1,5 @@
-import std.array, std.bitmanip, std.datetime, std.file, std.path, std.stdio, std.string;
+import std.algorithm, std.array, std.bitmanip, std.datetime, std.file,
+    std.path, std.stdio, std.string;
 import dcuserial;
 
 enum string[ubyte] Compilers = [
@@ -232,7 +233,22 @@ class Dcu
         w ~= format("\nunit %s;\n\ninterface\n\n", unitname);
         w ~= "";
         w ~= "implematation\n\n";
-        w ~= "end.\n";
+        foreach (source; sourceFiles)
+        {
+            if (source.tag == 0x72)
+            {
+                if (source.name.startsWith(unitname))
+                {
+                    auto ext = extension(source.name);
+                    w ~= format("{$R *%s}\n", ext);
+                }
+                else
+                {
+                    w ~= format("{$R %s}n", source.name);
+                }
+            }
+        }
+        w ~= "\nend.\n";
         return w[];
     }
 }
