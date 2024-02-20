@@ -455,7 +455,7 @@ An unit have many const, procedures and types, end with 63 tag.
 67 08 40 4C 53 74 72 4C 65 6E | B1 D9 99 A8 9F 19 5C 34 F0
 ```
 
-== 70 | 76 Source File Name
+== 70 | 72(Resource) |76 Source File Name
 
 ```
 70 0A 55 45 6D 70 74 79 2E 70 61 73 | 35 7F 91 57 | 00
