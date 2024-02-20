@@ -184,7 +184,7 @@ class Dcu
         for (;;)
         {
             ubyte tag = decodeBuffer.peek!ubyte();
-            if (tag != 0x70)
+            if (tag != 0x70 && tag != 0x72)
                 break;
             auto source = deserialize!SourceFile(decodeBuffer);
             sourceFiles ~= source;
