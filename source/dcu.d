@@ -60,7 +60,7 @@ string getPlatformString(ubyte platform)
 
 align(1)
 {
-    struct DcuHeader
+    class DcuHeader
     {
         ubyte majar;
         ubyte platform;
@@ -76,7 +76,7 @@ align(1)
             buffer.compiler = this.compiler;
         }
 
-        string toString()
+        override string toString()
         {
             auto w = appender!string;
             w ~= format("// majar: $%02X\n", majar);
@@ -90,7 +90,7 @@ align(1)
         }
     }
 
-    struct DcuAddtional
+    class DcuAddtional
     {
         @Condition("__buffer.compiler >= Compiler.Delphi7")
         ubyte tag = 2;
@@ -102,13 +102,13 @@ align(1)
             @Var uint unknown2;
         }
 
-        string toString()
+        override string toString()
         {
             return format("// Addtional: $%02X %s %d %d\n", tag, name, unknown1, unknown2);
         }
     }
 
-    struct DcuFlag
+    class DcuFlag
     {
         ubyte tag = 0x96;
         @Var uint unknown1;
@@ -116,7 +116,7 @@ align(1)
         @Var uint unknown2;
         @Var uint unknown3;
 
-        string toString()
+        override string toString()
         {
             return format("// Compile flags: $%02X %s %d %d\n", tag, unknown1, unknown2, unknown3);
         }
@@ -171,13 +171,13 @@ class Dcu
         auto encoded = contentBuffer.data!ubyte();
         encodeHeader.size = cast(uint) encoded.length;
         encodeHeader.compiledAt = SysTimeToDosFileTime(Clock.currTime());
-        encodeBuffer.write!DcuHeader(encodeHeader);
+        encodeHeader.serialize(encodeBuffer);
         encodeBuffer.write(encoded);
     }
 
     void decode()
     {
-        header = decodeBuffer.read!DcuHeader();
+        header = deserialize!DcuHeader(decodeBuffer);
         unknown1 = decodeBuffer.read!ubyte();
         addtional = deserialize!DcuAddtional(decodeBuffer);
         dcuFlag = deserialize!DcuFlag(decodeBuffer);
