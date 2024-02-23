@@ -125,7 +125,7 @@ align(1)
 
     class SourceFile
     {
-        ubyte tag = 0x70;
+        ubyte tag = 0x70; // 72 76
         @Length!ubyte string name;
         DosFileTime lastModified;
         @Var uint index;
@@ -135,6 +135,13 @@ align(1)
             return format("// Source file: $%02X %s %s %d\n", tag, name,
                     DosFileTimeToSysTime(lastModified).toISOExtString(), index);
         }
+    }
+
+    class DcuUse {
+        ubyte tag = 0x64; // or 65
+        @Length!ubyte string name;
+        @Var uint unknown1;
+        @Var uint unknown2;
     }
 }
 
